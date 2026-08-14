@@ -89,7 +89,7 @@ describe('BigNumberViz color formatters', () => {
 });
 
 describe('BigNumberViz context menu', () => {
-  test('invokes onContextMenu and stops the event bubbling to ancestor handlers', () => {
+  test('invokes onContextMenu with click coordinates, suppresses the native menu, and stops the event bubbling to ancestor handlers', () => {
     const onContextMenu = jest.fn();
     const ancestorHandler = jest.fn();
 
@@ -111,9 +111,15 @@ describe('BigNumberViz context menu', () => {
     );
 
     const headerLine = container.querySelector('.header-line');
-    fireEvent.contextMenu(headerLine!, { clientX: 10, clientY: 20 });
+    // fireEvent returns false when the event's preventDefault() was called,
+    // confirming the native browser context menu is suppressed.
+    const eventNotCanceled = fireEvent.contextMenu(headerLine!, {
+      clientX: 10,
+      clientY: 20,
+    });
 
     expect(onContextMenu).toHaveBeenCalledWith(10, 20);
+    expect(eventNotCanceled).toBe(false);
     expect(ancestorHandler).not.toHaveBeenCalled();
   });
 });
